@@ -14,9 +14,11 @@
   
 # Setting control Variables
   verbose = TRUE
+  wordcloude = FALSE
   TweetCounts = 1500
   tweets.tweets <- list()
   tweetChar <- c("@wm","@Walmart", "@wal-mart")  
+  
 # Loading the R functions, switching to verb_print to define sections  
 if(verbose){print("Loading R functions")}
   source(file.path(wdcode, 'TwitterFunctions.R') )
@@ -47,30 +49,32 @@ verb_print("Scoring Tweets")
 verb_print("histogram time")      
       hist(tweets.score$score)
 
-verb_print("tweets to score now")   
+verb_print("tweets_to_score function engaged")   
     score2<- data.frame(score = as.integer(), text =as.character(), code = as.character())
-      for(i in tweetChar)
+    for(i in tweetChar)
     { verb_print(i)
       score2 <- rbind(score2, tweet_to_score(i, pos.word =  pos_list, neg.word = neg_list, .progress='text'))}
 
+if(wordcloude){
 verb_print("trying a wordcloud thingy")    
-
+#cleaning sentence
+tweets.text <- lapply(tweets.text, clean_sentence, remove.words = c("walmart","wal","@WalMart","WalMart", "@Walmart","Walmart","WM","wm","Wal-Mart","Mart","mart"))
 #In tm package, the documents are managed by a structure called Corpus
-myCorpus = Corpus(VectorSource(tweets.text))
+tweets.corpus = Corpus(VectorSource(tweets.text))
 
 #Create a term-document matrix from a corpus
-tdm = TermDocumentMatrix(myCorpus,control = list(removePunctuation = TRUE,stopwords = c("new", "year", stopwords("english")), removeNumbers = TRUE, tolower = FALSE))
+tweets.tdm = TermDocumentMatrix(tweets.corpus,control = list(removePunctuation = TRUE,stopwords = c("WM", "walmart","WalMart","Wal-Mart","WalMart", stopwords("english")), removeNumbers = TRUE, tolower = F))
 
 #Convert as matrix
-m = as.matrix(tdm)
+tweets.tdm = as.matrix(tweets.tdm)
 
 #Get word counts in decreasing order
-word_freqs = sort(rowSums(m), decreasing=TRUE) 
+tweets.word_freqs = sort(rowSums(tweets.tdm), decreasing=TRUE) 
 
 #Create data frame with words and their frequencies
-dm = data.frame(word=names(word_freqs), freq=word_freqs)
+dm = data.frame(word=names(tweets.word_freqs), freq=tweets.word_freqs)
 
 #Plot wordcloud
 wordcloud(dm$word, dm$freq, random.order=FALSE, colors=brewer.pal(8, "Dark2"))
 
-      
+}

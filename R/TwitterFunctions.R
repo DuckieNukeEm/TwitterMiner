@@ -7,8 +7,20 @@ verb_print <- function(...){
  if(verbose) {print(...)}
   }
 
-#transfomes words
-
+#transfomes words and clean 'em up
+clean_sentence <- function(sentence, remove.words = NULL){
+  # clean up sentences with R's regex-driven global substitute, gsub():
+  sentence = gsub('[[:punct:]]', '', sentence)
+  sentence = gsub('[[:cntrl:]]', '', sentence)
+  sentence = gsub('\\d+', '', sentence)
+  #removing icons
+  sentence = iconv(sentence, "latin1", "ASCII", sub="")
+  # and convert to lower case:
+  sentence = try(tolower(sentence), silent = T)
+  if(length(remove.words)) {sentence <- removeWords(sentence, remove.words)}
+  return(sentence)
+  
+}
 #This function will score a sentence
 calc_score <- function(sentence, pos.words, neg.words) {
   # clean up sentences with R's regex-driven global substitute, gsub():
