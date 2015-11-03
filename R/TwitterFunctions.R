@@ -3,7 +3,7 @@
 #######################################################################
 
 #This is the print function for the verbose
-verb_print <- function(...){
+vprint <- function(...){
  if(verbose) {print(...)}
   }
 

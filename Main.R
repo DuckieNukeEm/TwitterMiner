@@ -1,6 +1,7 @@
 # Authenticatng
   #do it yourself
 # Setting the working directory
+  source("c:/scripts/R/TWitterMiner.R")
   wd <- getwd()
   wdcode <- file.path(wd, 'R')
   wddata <- file.path(wd, 'Data')
@@ -18,17 +19,20 @@
   TweetCounts = 1500
   tweets.tweets <- list()
   tweetChar <- c("@wm","@Walmart", "@wal-mart")  
+
+#authenticating to R
+  source(file.path(wdcode, "TwitterAuth.R"))
   
 # Loading the R functions, switching to verb_print to define sections  
 if(verbose){print("Loading R functions")}
   source(file.path(wdcode, 'TwitterFunctions.R') )
 
-verb_print("Loading the data sources now")
+vprint("Loading the data sources now")
     pos_list = scan(file.path(wddata, "hu_positive_words.txt"), what='character', comment.char=';')
     neg_list = scan(file.path(wddata, "hu_negative_words.txt"), what='character', comment.char=';')
 
     
-verb_print("scrapping R now")
+vprint("scrapping R now")
       for(i in tweetChar)
       { verb_print(i)
         tweets.tweets <- c(tweets.tweets, searchTwitter(i, n=TweetCounts))}
@@ -36,27 +40,27 @@ verb_print("scrapping R now")
     #verb_print(paste(c("Scrapped ", length(wm.tweets),". ",length(wm.tweets)/(1500*2), "% efficent" ), sep ="")
 
       
-verb_print("Cleaning the tweets")      
+vprint("Cleaning the tweets")      
       tweets.tweets <- strip_retweets(tweets.tweets,strip_manual=TRUE,strip_mt=TRUE)
       
       
-verb_print("Converting tweets to text")
+vprint("Converting tweets to text")
       tweets.text = laply(tweets.tweets, function(t) t$getText() )
       
-verb_print("Scoring Tweets")      
+vprint("Scoring Tweets")      
       tweets.score <- score.sentiment(tweets.text, pos_list, neg_list, .progress='text')
       
-verb_print("histogram time")      
+vprint("histogram time")      
       hist(tweets.score$score)
 
-verb_print("tweets_to_score function engaged")   
+vprint("tweets_to_score function engaged")   
     score2<- data.frame(score = as.integer(), text =as.character(), code = as.character())
     for(i in tweetChar)
     { verb_print(i)
       score2 <- rbind(score2, tweet_to_score(i, pos.word =  pos_list, neg.word = neg_list, .progress='text'))}
 
 if(wordcloude){
-verb_print("trying a wordcloud thingy")    
+vprint("trying a wordcloud thingy")    
 #cleaning sentence
 tweets.text <- lapply(tweets.text, clean_sentence, remove.words = c("walmart","wal","@WalMart","WalMart", "@Walmart","Walmart","WM","wm","Wal-Mart","Mart","mart"))
 #In tm package, the documents are managed by a structure called Corpus
